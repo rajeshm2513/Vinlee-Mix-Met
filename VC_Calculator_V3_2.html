@@ -1,0 +1,1287 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>VINLEE Calculator
+
+    </title>
+
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet">
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        body {
+            background: #020817;
+            min-height: 100vh;
+            overflow-x: hidden;
+            overflow-y: auto;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            padding: 20px 0;
+        }
+
+        /* BACKGROUND */
+
+        .bg {
+            position: fixed;
+            inset: 0;
+            background:
+                linear-gradient(rgba(0, 255, 255, 0.04) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0, 255, 255, 0.04) 1px, transparent 1px);
+            background-size: 50px 50px;
+            z-index: -3;
+        }
+
+        .glow {
+            position: fixed;
+            width: 350px;
+            height: 350px;
+            border-radius: 50%;
+            filter: blur(90px);
+            z-index: -2;
+        }
+
+        .g1 {
+            top: -100px;
+            left: -100px;
+            background: rgba(0, 229, 255, 0.15);
+        }
+
+        .g2 {
+            bottom: -100px;
+            right: -100px;
+            background: rgba(0, 140, 255, 0.12);
+        }
+
+        /* MAIN */
+
+        .container {
+            text-align: center;
+            padding: 20px;
+            width: min(100%, 960px);
+        }
+
+        .title {
+            font-size: 4rem;
+            font-weight: 700;
+            margin-bottom: 15px;
+        }
+
+        .title span {
+            color: #67d9ff;
+        }
+
+        .subtitle {
+            color: #cbd5e1;
+            font-size: 1.1rem;
+            margin-bottom: 50px;
+        }
+
+        .options {
+            display: flex;
+            gap: 50px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .option {
+            width: 250px;
+            height: 250px;
+            border-radius: 30px;
+            background: rgba(10, 20, 40, 0.8);
+            backdrop-filter: blur(10px);
+            border: 2px solid rgba(103, 217, 255, 0.2);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            transition: 0.4s;
+            box-shadow: 0 0 25px rgba(0, 229, 255, 0.08);
+        }
+
+        .option:hover {
+            transform: translateY(-10px) scale(1.04);
+            border-color: #67d9ff;
+            box-shadow: 0 0 35px rgba(0, 229, 255, 0.25);
+        }
+
+        .option img {
+            width: 100px;
+            margin-bottom: 20px;
+        }
+
+        .option h2 {
+            font-size: 2rem;
+        }
+
+        /* POPUP */
+
+        .popup {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.75);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 100;
+            padding: 20px;
+            overflow-y: auto;
+        }
+
+        .calculator {
+            width: 430px;
+            max-width: 100%;
+            max-height: 95vh;
+            overflow-y: auto;
+            border-radius: 30px;
+            padding: 30px;
+            background: rgba(10, 20, 40, 0.85);
+            backdrop-filter: blur(12px);
+            border: 2px solid rgba(103, 217, 255, 0.25);
+            box-shadow: 0 0 40px rgba(0, 229, 255, 0.2);
+            animation: popup 0.5s ease;
+        }
+
+        @keyframes popup {
+            from {
+                opacity: 0;
+                transform: scale(0.8) rotateY(90deg);
+            }
+
+            to {
+                opacity: 1;
+                transform: scale(1) rotateY(0deg);
+            }
+        }
+
+        .calc-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+        }
+
+        .calc-header h2 {
+            color: #67d9ff;
+        }
+
+        .close {
+            font-size: 2rem;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        .close:hover {
+            transform: rotate(90deg);
+            color: #67d9ff;
+        }
+
+        /* IMAGES */
+
+        .images {
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .images img {
+            width: 85px;
+            height: 120px;
+            object-fit: cover;
+            border-radius: 12px;
+            padding: 4px;
+            background: white;
+            transition: 0.3s;
+        }
+
+        .images img:hover {
+            transform: scale(1.05);
+        }
+
+        .field-row {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-top: 15px;
+        }
+
+        .field-row .field-input-group {
+            flex: 1;
+        }
+
+        .field-image {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid rgba(103, 217, 255, 0.25);
+            background: white;
+            padding: 3px;
+            flex-shrink: 0;
+            cursor: pointer;
+            transition: 0.3s;
+            box-shadow: 0 0 10px rgba(0, 229, 255, 0.12);
+        }
+
+        .field-image:hover {
+            transform: scale(1.06);
+            border-color: #67d9ff;
+        }
+
+        /* INPUTS */
+
+        select,
+        input {
+            width: 100%;
+            padding: 15px;
+            border: none;
+            outline: none;
+            border-radius: 14px;
+            background: #0d1c35;
+            border: 2px solid rgba(103, 217, 255, 0.2);
+            color: white;
+            margin-top: 15px;
+            font-size: 1rem;
+            transition: 0.3s;
+        }
+
+        select:focus,
+        input:focus {
+            border-color: #67d9ff;
+            box-shadow: 0 0 15px rgba(0, 229, 255, 0.2);
+        }
+
+        /* RESULT */
+
+        .result {
+            margin-top: 20px;
+            padding: 18px;
+            border-radius: 14px;
+            background: rgba(255, 255, 255, 0.05);
+            line-height: 1.8;
+            color: #dff9ff;
+            min-height: 90px;
+        }
+
+        .paint-summary-box {
+            background: rgba(103, 217, 255, 0.12);
+            border: 1px solid rgba(103, 217, 255, 0.25);
+            border-radius: 14px;
+            padding: 12px;
+            margin-top: 15px;
+        }
+
+        .paint-summary-box h4 {
+            color: #67d9ff;
+            margin-bottom: 8px;
+            font-size: 0.95rem;
+        }
+
+        .paint-result-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .paint-result-card {
+            background: rgba(255, 255, 255, 0.06);
+            border: 1px solid rgba(103, 217, 255, 0.2);
+            border-radius: 12px;
+            padding: 10px;
+            text-align: center;
+        }
+
+        .paint-result-card .label {
+            color: #67d9ff;
+            font-size: 0.85rem;
+            font-weight: 600;
+            margin-bottom: 8px;
+            display: block;
+        }
+
+        .paint-result-card .value-box {
+            background: rgba(10, 20, 40, 0.8);
+            border: 1px solid rgba(103, 217, 255, 0.2);
+            border-radius: 10px;
+            padding: 8px 6px;
+            color: white;
+            font-weight: 600;
+            min-height: 42px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .paint-result-card .value-input {
+            width: 100%;
+            background: rgba(10, 20, 40, 0.8);
+            border: 1px solid rgba(103, 217, 255, 0.2);
+            border-radius: 10px;
+            padding: 8px 6px;
+            color: white;
+            font-weight: 600;
+            min-height: 42px;
+            text-align: center;
+        }
+
+        .paint-result-card .value-input:focus {
+            outline: none;
+            border-color: #67d9ff;
+        }
+
+        .paint-result-note {
+            margin-top: 8px;
+            color: #8fdcff;
+            font-size: 0.8rem;
+            text-align: center;
+        }
+
+        /* BUTTON */
+
+        .btn {
+            width: 100%;
+            padding: 15px;
+            border: none;
+            border-radius: 14px;
+            background: linear-gradient(90deg, #00a6ff, #67e4ff);
+            margin-top: 20px;
+            color: white;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.4s;
+        }
+
+        .btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 0 20px rgba(0, 229, 255, 0.4);
+        }
+
+        /* PAINT CHIPS */
+
+        .paint-chip {
+            padding: 12px 18px;
+            border-radius: 999px;
+            font-weight: 700;
+            font-size: 0.95rem;
+            border: 1px solid rgba(103, 217, 255, 0.28);
+        }
+
+        .white-chip {
+            background: #f8fafc;
+            color: #0f172a;
+        }
+
+        .grey-chip {
+            background: #94a3b8;
+            color: #0f172a;
+        }
+
+        /* RESPONSIVE */
+
+        @media(max-width:768px) {
+
+            body {
+                align-items: flex-start;
+                padding: 24px 0;
+            }
+
+            .container {
+                padding: 16px 12px;
+            }
+
+            .title {
+                font-size: clamp(1.8rem, 6vw, 2.4rem);
+            }
+
+            .subtitle {
+                font-size: 1rem;
+                margin-bottom: 28px;
+            }
+
+            .options {
+                gap: 20px;
+            }
+
+            .option {
+                width: min(100%, 280px);
+                height: 200px;
+            }
+
+            .option img {
+                width: 72px;
+                margin-bottom: 14px;
+            }
+
+            .option h2 {
+                font-size: 1.5rem;
+            }
+
+            .popup {
+                padding: 12px;
+                align-items: flex-start;
+            }
+
+            .calculator {
+                padding: 18px;
+            }
+
+            .images img {
+                width: 72px;
+                height: 100px;
+            }
+
+            select,
+            input,
+            .btn {
+                padding: 13px;
+                font-size: 0.95rem;
+            }
+
+            .result {
+                min-height: auto;
+            }
+        }
+
+        @media(max-width:480px) {
+            .glow {
+                width: 220px;
+                height: 220px;
+                filter: blur(70px);
+            }
+
+            .container {
+                padding: 12px 10px;
+            }
+
+            .option {
+                width: 100%;
+                height: 180px;
+            }
+
+            .images {
+                gap: 8px;
+            }
+
+            .images img {
+                width: 64px;
+                height: 90px;
+            }
+
+            .calculator {
+                padding: 16px;
+                border-radius: 20px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="bg"></div>
+
+    <div class="glow g1"></div>
+    <div class="glow g2"></div>
+
+    <div class="container">
+
+        <h1 class="title">
+            VINLEE  <span>MIX MET</span> 
+        </h1>
+
+        <p class="subtitle">
+            Select an option to open calculator
+        </p>
+
+        <div class="options">
+            <div class="option" onclick="openResign()">
+
+                <img src="https://res.cloudinary.com/dpxrmf3vc/image/upload/v1781435387/images_gwp2r5.png">
+
+                <h2>Resin</h2>
+
+            </div>
+
+            <div class="option" onclick="openPaint()">
+
+                <img src="https://cdn-icons-png.flaticon.com/512/2970/2970785.png">
+
+                <h2>Paint</h2>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- Resin -->
+
+    <div class="popup" id="resignPopup">
+
+        <div class="calculator">
+
+            <div class="calc-header">
+
+                <h2 id="resinCalculatorTitle">Resin Calculator</h2>
+
+                <div class="close" onclick="closePopup('resignPopup')">×</div>
+            </div>
+
+            <div class="images" id="componentImages" style="display:none;"></div>
+
+            <select id="component" onchange="resinTypeChanged()">
+
+                <option value="Araldite LY 1564">Araldite LY 1564</option>
+                <option value="AV138">AV138</option>
+                <option value="Araldite LY 556">Araldite LY 556</option>
+                <option value="EPOXY RESIN">EPOXY RESIN</option>
+
+            </select>
+            <div class="field-row">
+                <div class="field-input-group">
+                    <label>Resin Weight (g)</label>
+                    <input type="number" id="resinWeight" placeholder="Enter Resin Weight" oninput="resinChanged()">
+                </div>
+                <img id="resinFieldImage" class="field-image" onclick="openImage(this.src)" alt="Resin image">
+            </div>
+
+            <div class="field-row">
+                <div class="field-input-group">
+                    <label>Hardener Weight (g)</label>
+                    <input type="number" id="hardenerWeight" placeholder="Enter Hardener Weight" oninput="hardenerChanged()">
+                </div>
+                <img id="hardenerFieldImage" class="field-image" onclick="openImage(this.src)" alt="Hardener image">
+            </div>
+
+            <div class="result">
+
+                <label>Total Mix (g)</label>
+
+                <input type="number" id="totalWeight" placeholder="Enter Total Weight" oninput="totalChanged()">
+
+
+                <div class="result" id="info">
+
+                    Material Information
+
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <div class="popup" id="paintPopup">
+
+        <div class="calculator">
+
+            <div class="calc-header">
+                <h2 id="paintCalculatorTitle">Paint Calculator</h2>
+                <div class="close" onclick="closePopup('paintPopup')">×</div>
+            </div>
+
+            <div class="images" id="paintImages"></div>
+
+            <select id="paintType" onchange="updatePaintTitle()">
+                <option value="grey">Grey Primer</option>
+                <option value="whiteprimer">White Primer</option>
+                <option value="solidwhite">Solid White</option>
+                <option value="hsclear">HS Clear</option>
+            </select>
+
+            <div class="field-row">
+                <div class="field-input-group">
+                    <label>Primer Weight (g)</label>
+                    <input type="number" id="paintPrimerInput" placeholder="Enter Primer Weight" oninput="paintInputChanged('primer')">
+                </div>
+                <img id="paintPrimerImage" class="field-image" onclick="openImage(this.src)" alt="Primer image">
+            </div>
+
+            <div class="field-row">
+                <div class="field-input-group">
+                    <label>Hardener Weight (g)</label>
+                    <input type="number" id="paintHardenerInput" placeholder="Enter Hardener Weight" oninput="paintInputChanged('hardener')">
+                </div>
+                <img id="paintHardenerImage" class="field-image" onclick="openImage(this.src)" alt="Hardener image">
+            </div>
+
+            <div class="field-row">
+                <div class="field-input-group">
+                    <label>Thinner Weight (g)</label>
+                    <input type="number" id="paintPaintInput" placeholder="Enter Thinner Weight" oninput="paintInputChanged('paint')">
+                </div>
+                <img id="paintThinnerImage" class="field-image" onclick="openImage(this.src)" alt="Thinner image">
+            </div>
+
+            <div class="result">
+                <label>Total Mix (g)</label>
+                <input type="number" id="paintTotalInput" placeholder="Enter Total Weight" oninput="paintInputChanged('totalMixture')">
+            </div>
+
+            <div class="result" id="paintResult">
+                <div class="paint-result-note">Select a paint type and enter a value to view the mix ratio, product info, and calculated quantities.</div>
+            </div>
+
+        </div>
+
+    </div>
+
+    <div class="popup" id="imagePopup">
+
+                <div class="calculator">
+
+                    <div class="calc-header">
+
+                        <h2>Image Preview</h2>
+
+                        <div class="close" onclick="closePopup('imagePopup')">×</div>
+
+                    </div>
+
+                    <img id="popupImage" style="
+width:100%;
+max-height:70vh;
+object-fit:contain;
+border-radius:15px;
+">
+
+                </div>
+
+            </div>
+
+            <script>
+
+
+
+                function openImage(src) {
+
+                    document.getElementById('popupImage').src = src;
+
+                    document.getElementById('imagePopup').style.display = 'flex';
+
+                }
+
+
+                /* OPEN POPUPS */
+
+                function openResign() {
+                    document.getElementById('resignPopup').style.display = 'flex';
+                }
+
+                function openPaint() {
+                    document.getElementById('paintPopup').style.display = 'flex';
+                    renderPaintInputs();
+                    updatePaintUI();
+                }
+
+                function closePopup(id) {
+                    document.getElementById(id).style.display = 'none';
+                }
+
+                /* ESC CLOSE */
+
+                document.addEventListener('keydown', function (e) {
+                    if (e.key === "Escape") {
+                        closePopup('resignPopup');
+                        closePopup('paintPopup');
+                    }
+                });
+
+                function updateTotal() {
+
+                    let resin = parseFloat(document.getElementById("resinWeight").value) || 0;
+
+                    let hardener = parseFloat(document.getElementById("hardenerWeight").value) || 0;
+
+                    document.getElementById("totalWeight").value =
+                        (resin + hardener).toFixed(2);
+
+                }
+
+
+                function totalChanged() {
+
+                    let type = document.getElementById("component").value;
+                    let ratio = resinData[type].ratio;
+
+                    let total = parseFloat(document.getElementById("totalWeight").value) || 0;
+
+                    let resin = total / (1 + ratio);
+
+                    let hardener = resin * ratio;
+
+                    document.getElementById("resinWeight").value = resin.toFixed(2);
+
+                    document.getElementById("hardenerWeight").value = hardener.toFixed(2);
+
+                }
+
+                /* ===========================
+                   RESIN DATA
+                =========================== */
+
+                const resinData = {
+
+                    "Araldite LY 1564": {
+                        resin: "Araldite LY 1564",
+                        hardener: "Aradur 3486 CH",
+                        ratio: 0.34,
+                        ratioText: "1 : 0.34",
+                        type: "Epoxy Resin",
+                        info: "Used for UAV composite parts, carbon fiber laminates and structural bonding.",
+                        potLife: "45 Minutes"
+                    },
+
+                    "AV138": {
+                        resin: "AV138",
+                        hardener: "Huntsman Hardener",
+                        ratio: 0.40,
+                        ratioText: "1 : 0.40",
+                        type: "Structural Epoxy Adhesive",
+                        info: "High-strength adhesive used for aerospace and UAV structural bonding.",
+                        potLife: "60 Minutes"
+                    },
+
+                    "Araldite LY 556": {
+                        resin: "Araldite LY 556",
+                        hardener: "Aradur HY951",
+                        ratio: 0.10,
+                        ratioText: "10 : 1",
+                        type: "General Purpose Epoxy",
+                        info: "Suitable for FRP, fiberglass, composites and UAV manufacturing.",
+                        potLife: "30 Minutes"
+                    },
+
+                    "EPOXY RESIN": {
+                        resin: "Epoxy Resin",
+                        hardener: "Epoxy Hardener",
+                        ratio: 1,
+                        ratioText: "1 : 1",
+                        type: "Casting & Lamination Epoxy",
+                        info: "General purpose epoxy resin used for casting, laminating and repairs.",
+                        potLife: "25 Minutes"
+                    }
+
+                };
+
+
+                /* ===========================
+                   UPDATE RESIN DETAILS
+                =========================== */
+
+                function updateResinDetails() {
+
+                    let type = document.getElementById("component").value;
+
+                    let data = resinData[type];
+
+                    const title = document.getElementById("resinCalculatorTitle");
+
+                    if (title) {
+                        title.textContent = `${type} Calculator`;
+                    }
+
+                    const infoPanel = document.getElementById("info");
+
+                    if (!infoPanel) {
+                        return;
+                    }
+
+                    infoPanel.innerHTML = `
+    <div id="ratioCard" style="margin-bottom: 10px;">
+        <b>Mix Ratio</b><br>
+        ${data.ratioText}
+    </div>
+
+    <div id="infoCard">
+        <b>${data.type}</b><br><br>
+
+        <b>Application</b><br>
+
+        ${data.info}<br><br>
+
+        <b>Pot Life</b><br>
+
+        ${data.potLife}
+    </div>
+    `;
+
+                }
+
+                /* ===========================
+                   USER CHANGED RESIN
+                =========================== */
+
+                function resinChanged() {
+
+                    let type = document.getElementById("component").value;
+                    let ratio = resinData[type].ratio;
+
+                    let resin = parseFloat(document.getElementById("resinWeight").value) || 0;
+
+                    let hardener = resin * ratio;
+
+                    document.getElementById("hardenerWeight").value = hardener.toFixed(2);
+
+                    document.getElementById("totalWeight").value =
+                        (resin + hardener).toFixed(2);
+
+                }
+
+
+                /* ===========================
+                   USER CHANGED HARDENER
+                =========================== */
+
+                function hardenerChanged() {
+
+                    let type = document.getElementById("component").value;
+                    let ratio = resinData[type].ratio;
+
+                    let hardener = parseFloat(document.getElementById("hardenerWeight").value) || 0;
+
+                    let resin = hardener / ratio;
+
+                    document.getElementById("resinWeight").value = resin.toFixed(2);
+
+                    document.getElementById("totalWeight").value =
+                        (resin + hardener).toFixed(2);
+
+                }
+
+
+                /* ===========================
+                   TOTAL MIX
+                =========================== */
+
+                function updateTotal() {
+
+                    let resin = parseFloat(
+                        document.getElementById("resinWeight").value
+                    ) || 0;
+
+                    let hardener = parseFloat(
+                        document.getElementById("hardenerWeight").value
+                    ) || 0;
+
+                    document.getElementById("totalWeight").value =
+                        (resin + hardener).toFixed(2);
+
+                }
+
+
+                /* ===========================
+                   RESIN TYPE CHANGED
+                =========================== */
+
+                function resinTypeChanged() {
+
+                    document.getElementById("resinWeight").value = "";
+
+                    document.getElementById("hardenerWeight").value = "";
+
+                    document.getElementById("totalWeight").value = "";
+
+                    updateResinDetails();
+
+                    updateImages();
+
+                }
+
+
+                /* ===========================
+                   INITIALIZE
+                =========================== */
+
+                window.onload = function () {
+
+                    updateResinDetails();
+
+                    updateImages();
+
+                    updatePaintTitle();
+
+                }
+                /* UPDATE IMAGES */
+
+                function updateImages() {
+
+                    const type = document.getElementById('component').value;
+                    const resinImg = document.getElementById('resinFieldImage');
+                    const hardenerImg = document.getElementById('hardenerFieldImage');
+                    const imagesDiv = document.getElementById('componentImages');
+
+                    let resinSrc = '';
+                    let hardenerSrc = '';
+ 
+                    if (type === 'Araldite LY 1564') {
+                        resinSrc = 'https://res.cloudinary.com/dpxrmf3vc/image/upload/v1781430583/IMG_20260614_150108_kfgtcx.jpg';
+                        hardenerSrc = 'https://res.cloudinary.com/dpxrmf3vc/image/upload/v1781430583/IMG_20260614_150213_h6blwa.jpg';
+                    }
+
+                    if (type === 'AV138') {
+                        resinSrc = 'https://res.cloudinary.com/dpxrmf3vc/image/upload/v1782482414/WhatsApp_Image_2026-06-26_at_5.29.18_PM_ljovbj.jpg';
+                        hardenerSrc = 'https://res.cloudinary.com/dpxrmf3vc/image/upload/v1782482414/WhatsApp_Image_2026-06-26_at_5.29.17_PM_iaddfy.jpg';
+                    }
+
+                    if (type === 'Araldite LY 556') {
+                        resinSrc = 'https://res.cloudinary.com/dpxrmf3vc/image/upload/v1782038273/556_lsrmvi.jpg';
+                        hardenerSrc = 'https://res.cloudinary.com/dpxrmf3vc/image/upload/v1782038229/951_w9obmp.jpg';
+                    }
+
+                    if (type === 'EPOXY RESIN') {
+                        resinSrc = 'https://res.cloudinary.com/dpxrmf3vc/image/upload/v1782040629/WhatsApp_Image_2026-06-21_at_4.45.47_PM_zbjlpc.jpg';
+                        hardenerSrc = 'https://res.cloudinary.com/dpxrmf3vc/image/upload/v1782040629/WhatsApp_Image_2026-06-21_at_4.45.46_PM_fp0nem.jpg';
+                    }
+
+                    if (resinImg) {
+                        resinImg.src = resinSrc;
+                    }
+
+                    if (hardenerImg) {
+                        hardenerImg.src = hardenerSrc;
+                    }
+
+                    if (imagesDiv) {
+                        imagesDiv.innerHTML = '';
+                    }
+
+                }
+
+
+                /* PAINT */
+                function updatePaintTitle() {
+
+                    const title = document.getElementById('paintCalculatorTitle');
+                    const type = document.getElementById('paintType').value;
+
+                    if (!title) {
+                        return;
+                    }
+
+                    const labelMap = {
+                        grey: 'Grey',
+                        whiteprimer: 'White Primer',
+                        solidwhite: 'Solid White Primer',
+                        hsclear: 'HS Clear'
+                    };
+
+                    title.textContent = `${labelMap[type] || 'Paint'} Calculator`;
+
+                    updatePaintImages();
+                    updatePaintUI();
+                }
+
+                const paintData = {
+                    grey: {
+                        ratioText: '1 : 0.11 : 0.14',
+                        info: 'Grey paint mix uses one part primer, 0.11 parts hardener, and 0.14 parts thinner for a balanced finish.'
+                    },
+                    whiteprimer: {
+                        ratioText: '1 : 0.20 : 0.32',
+                        info: 'White primer mix uses one part primer, 0.20 parts hardener, and 0.32 parts thinner for adhesion and coverage.'
+                    },
+                    solidwhite: {
+                        ratioText: '1 : 0.24 : 0.558',
+                        info: 'Solid white primer mix uses one part primer, 0.24 parts hardener, and 0.558 parts thinner for high opacity.'
+                    },
+                    hsclear: {
+                        ratioText: '1 : 0.50 : 0.675',
+                        info: 'HS clear mix uses one part clearcoat, 0.50 parts hardener, and 0.675 parts thinner for a premium clear finish.'
+                    }
+                };
+
+                function renderPaintInputs() {
+                    const resultBox = document.getElementById('paintResult');
+
+                    if (!resultBox) {
+                        return;
+                    }
+
+                    resultBox.innerHTML = `
+`;
+                }
+
+                function paintInputChanged(changedField) {
+                    updatePaintUI(changedField);
+                }
+
+                function updatePaintUI(changedField) {
+                    const type = document.getElementById('paintType').value;
+                    const resultBox = document.getElementById('paintResult');
+                    const paintInfo = paintData[type] || { ratioText: '', info: '' };
+
+                    if (!resultBox || !document.getElementById('paintPrimerInput')) {
+                        renderPaintInputs();
+                    }
+
+                    const sourceIdMap = {
+                        primer: 'paintPrimerInput',
+                        hardener: 'paintHardenerInput',
+                        paint: 'paintPaintInput',
+                        totalMixture: 'paintTotalInput'
+                    };
+
+                    let sourceField = changedField;
+
+                    if (!sourceField || !sourceIdMap[sourceField]) {
+                        for (const key of Object.keys(sourceIdMap)) {
+                            const input = document.getElementById(sourceIdMap[key]);
+                            if (input && input.value !== '') {
+                                sourceField = key;
+                                break;
+                            }
+                        }
+                    }
+
+                    const renderPaintMessages = (note) => {
+                        if (!resultBox) {
+                            return;
+                        }
+
+                        resultBox.innerHTML = `
+<div class="paint-result-info">
+    <div class="paint-result-card">
+        <span class="label">Mix Ratio</span>
+        <div class="value-box">${paintInfo.ratioText}</div>
+    </div>
+    <div class="paint-result-card">
+        <span class="label">Info</span>
+        <div class="value-box">${paintInfo.info}</div>
+    </div>
+</div>
+<div class="paint-result-note">${note}</div>
+`;
+                    };
+
+                    if (!sourceField || !sourceIdMap[sourceField]) {
+                        renderPaintMessages(0, 0, 0, 0, 'Select a paint type and enter a weight to calculate the mix.');
+                        return;
+                    }
+
+                    const sourceInput = document.getElementById(sourceIdMap[sourceField]);
+                    const sourceValue = parseFloat(sourceInput.value);
+
+                    if (isNaN(sourceValue) || sourceValue <= 0) {
+                        renderPaintMessages(0, 0, 0, 0, 'Enter a valid positive weight to calculate the mix.');
+                        return;
+                    }
+
+                    let primer = 0;
+                    let hardener = 0;
+                    let paint = 0;
+                    let totalMixture = 0;
+                    let baseQty = 0;
+
+                    /* GREY */
+
+                    if (type === 'grey') {
+
+                        const hardenerRatio = 0.11;
+                        const paintRatio = 0.14;
+                        const totalRatio = 1.25;
+
+                        if (sourceField === 'primer') {
+                            baseQty = sourceValue;
+                        } else if (sourceField === 'hardener') {
+                            baseQty = sourceValue / hardenerRatio;
+                        } else if (sourceField === 'paint') {
+                            baseQty = sourceValue / paintRatio;
+                        } else {
+                            baseQty = sourceValue / totalRatio;
+                        }
+
+                        primer = baseQty;
+                        hardener = baseQty * hardenerRatio;
+                        paint = baseQty * paintRatio;
+                        totalMixture = baseQty * totalRatio;
+
+                    }
+
+                    /* WHITE PRIMER */
+
+                    else if (type === 'whiteprimer') {
+
+                        const hardenerRatio = 0.20;
+                        const paintRatio = 0.32;
+                        const totalRatio = 1.52;
+
+                        if (sourceField === 'primer') {
+                            baseQty = sourceValue;
+                        } else if (sourceField === 'hardener') {
+                            baseQty = sourceValue / hardenerRatio;
+                        } else if (sourceField === 'paint') {
+                            baseQty = sourceValue / paintRatio;
+                        } else {
+                            baseQty = sourceValue / totalRatio;
+                        }
+
+                        primer = baseQty;
+                        hardener = baseQty * hardenerRatio;
+                        paint = baseQty * paintRatio;
+                        totalMixture = baseQty * totalRatio;
+
+                    }
+
+                    /* Solid White */
+
+                    else if (type === 'solidwhite') {
+
+                        const hardenerRatio = 0.24;
+                        const paintRatio = 0.558;
+                        const totalRatio = 1.798;
+
+                        if (sourceField === 'primer') {
+                            baseQty = sourceValue;
+                        } else if (sourceField === 'hardener') {
+                            baseQty = sourceValue / hardenerRatio;
+                        } else if (sourceField === 'paint') {
+                            baseQty = sourceValue / paintRatio;
+                        } else {
+                            baseQty = sourceValue / totalRatio;
+                        }
+
+                        primer = baseQty;
+                        hardener = baseQty * hardenerRatio;
+                        paint = baseQty * paintRatio;
+                        totalMixture = baseQty * totalRatio;
+
+                    }
+
+                    /* HS CLEAR */
+
+                    else if (type === 'hsclear') {
+
+                        const hardenerRatio = 0.50;
+                        const paintRatio = 0.675;
+                        const totalRatio = 2.175;
+
+                        if (sourceField === 'primer') {
+                            baseQty = sourceValue;
+                        } else if (sourceField === 'hardener') {
+                            baseQty = sourceValue / hardenerRatio;
+                        } else if (sourceField === 'paint') {
+                            baseQty = sourceValue / paintRatio;
+                        } else {
+                            baseQty = sourceValue / totalRatio;
+                        }
+
+                        primer = baseQty;
+                        hardener = baseQty * hardenerRatio;
+                        paint = baseQty * paintRatio;
+                        totalMixture = baseQty * totalRatio;
+
+                    }
+
+                    const updateField = (fieldId, value, preserve) => {
+                        const field = document.getElementById(fieldId);
+                        if (!field) {
+                            return;
+                        }
+                        if (preserve) {
+                            return;
+                        }
+                        field.value = value.toFixed(2);
+                    };
+
+                    updateField('paintPrimerInput', primer, changedField === 'primer');
+                    updateField('paintHardenerInput', hardener, changedField === 'hardener');
+                    updateField('paintPaintInput', paint, changedField === 'paint');
+                    updateField('paintTotalInput', totalMixture, changedField === 'totalMixture');
+
+                    if (!resultBox) {
+                        return;
+                    }
+
+                    resultBox.innerHTML = `
+<div class="paint-result-info">
+    <div class="paint-result-card">
+        <span class="label">Mix Ratio</span>
+        <div class="value-box">${paintData[type]?.ratioText || ''}</div>
+    </div>
+    <div class="paint-result-card">
+        <span class="label">Info</span>
+        <div class="value-box">${paintData[type]?.info || ''}</div>
+    </div>
+</div>
+<div class="paint-result-note">Calculated values for the selected paint type.</div>
+`;
+                }
+
+                /* update Paint Images*/
+
+                function updatePaintImages() {
+
+                    const type = document.getElementById('paintType').value;
+                    const imagesDiv = document.getElementById('paintImages');
+                    const primerImg = document.getElementById('paintPrimerImage');
+                    const hardenerImg = document.getElementById('paintHardenerImage');
+                    const thinnerImg = document.getElementById('paintThinnerImage');
+
+                    let primerSrc = '';
+                    let hardenerSrc = '';
+                    let thinnerSrc = 'https://res.cloudinary.com/dpxrmf3vc/image/upload/v1782045722/duxone-dx32-thinner_ar8luq.jpg';
+
+                    if (type === 'grey') {
+                        primerSrc = 'https://res.cloudinary.com/dpxrmf3vc/image/upload/v1782045723/WhatsApp_Image_2026-06-21_at_5.51.28_PM_dhtb4q.jpg';
+                        hardenerSrc = 'https://res.cloudinary.com/dpxrmf3vc/image/upload/v1782045723/WhatsApp_Image_2026-06-21_at_5.51.29_PM_mpbzzu.jpg';
+                    }
+
+                    if (type === 'whiteprimer') {
+                        primerSrc = 'https://res.cloudinary.com/dpxrmf3vc/image/upload/v1782045943/WhatsApp_Image_2026-06-21_at_5.56.21_PM_xowzpx.jpg';
+                        hardenerSrc = 'https://res.cloudinary.com/dpxrmf3vc/image/upload/v1782045943/WhatsApp_Image_2026-06-21_at_5.55.55_PM_vdsjw8.jpg';
+                    }
+
+                    if (type === 'solidwhite') {
+                        primerSrc = 'https://res.cloudinary.com/dpxrmf3vc/image/upload/v1782046046/WhatsApp_Image_2026-06-21_at_6.06.05_PM_xzzp5x.jpg';
+                        hardenerSrc = 'https://res.cloudinary.com/dpxrmf3vc/image/upload/v1782046046/WhatsApp_Image_2026-06-21_at_6.06.06_PM_gpw7ql.jpg';
+                    }
+
+                    if (type === 'hsclear') {
+                        primerSrc = 'https://res.cloudinary.com/dpxrmf3vc/image/upload/v1782046131/WhatsApp_Image_2026-06-21_at_6.10.35_PM_kuvjlh.jpg';
+                        hardenerSrc = 'https://res.cloudinary.com/dpxrmf3vc/image/upload/v1782046131/WhatsApp_Image_2026-06-21_at_6.10.35_PM_1_sk5hkd.jpg';
+                    }
+
+                    if (primerImg) {
+                        primerImg.src = primerSrc;
+                    }
+
+                    if (hardenerImg) {
+                        hardenerImg.src = hardenerSrc;
+                    }
+
+                    if (thinnerImg) {
+                        thinnerImg.src = thinnerSrc;
+                    }
+
+                    if (imagesDiv) {
+                        imagesDiv.innerHTML = '';
+                    }
+
+                }
+
+
+            </script>
+
+</body>
+
+</html>
