@@ -9,17 +9,14 @@
 
     </title>
 
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
-        rel="stylesheet">
-     <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
         rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.11/font/bootstrap-icons.css">
 
-
     <style>
-        * {
+        *{
             margin: 0;
             padding: 0;
             box-sizing: border-box;
@@ -557,7 +554,7 @@
                 <option value="Araldite LY 1564">Araldite LY 1564</option>
                 <option value="AV138">AV138</option>
                 <option value="Araldite LY 556">Araldite LY 556</option>
-                <option value="EPOXY RESIN">EPOXY RESIN</option>
+                <option value="AEROSIL">AEROSIL</option>
 
             </select>
             <div class="field-row">
@@ -574,6 +571,14 @@
                     <input type="number" id="hardenerWeight" placeholder="Enter Hardener Weight" oninput="hardenerChanged()">
                 </div>
                 <img id="hardenerFieldImage" class="field-image" onclick="openImage(this.src)" alt="Hardener image">
+            </div>
+
+            <div class="field-row" id="aerosilRow" style="display:none;">
+                <div class="field-input-group">
+                    <label>Aerosil Weight (g)</label>
+                    <input type="number" id="aerosilWeight" placeholder="Enter Aerosil Weight" oninput="aerosilChanged()">
+                </div>
+                <img id="aerosilFieldImage" class="field-image" src="https://res.cloudinary.com/dpxrmf3vc/image/upload/v1782888551/aerosil-200-powder_y42hoc.jpg" onclick="openImage(this.src)" alt="Aerosil image">
             </div>
 
             <div class="result">
@@ -727,16 +732,29 @@ border-radius:15px;
                 function totalChanged() {
 
                     let type = document.getElementById("component").value;
-                    let ratio = resinData[type].ratio;
-
                     let total = parseFloat(document.getElementById("totalWeight").value) || 0;
 
-                    let resin = total / (1 + ratio);
+                    if (type === "AEROSIL") {
+                        if (total <= 0) {
+                            document.getElementById("resinWeight").value = "";
+                            document.getElementById("hardenerWeight").value = "";
+                            document.getElementById("aerosilWeight").value = "";
+                            return;
+                        }
 
+                        let scale = total / 11.5;
+
+                        document.getElementById("resinWeight").value = (scale * 10).toFixed(2);
+                        document.getElementById("hardenerWeight").value = (scale * 1).toFixed(2);
+                        document.getElementById("aerosilWeight").value = (scale * 0.5).toFixed(2);
+                        return;
+                    }
+
+                    let ratio = resinData[type].ratio;
+                    let resin = total / (1 + ratio);
                     let hardener = resin * ratio;
 
                     document.getElementById("resinWeight").value = resin.toFixed(2);
-
                     document.getElementById("hardenerWeight").value = hardener.toFixed(2);
 
                 }
@@ -777,13 +795,13 @@ border-radius:15px;
                         potLife: "30 Minutes"
                     },
 
-                    "EPOXY RESIN": {
-                        resin: "Epoxy Resin",
-                        hardener: "Epoxy Hardener",
-                        ratio: 1,
-                        ratioText: "1 : 1",
-                        type: "Casting & Lamination Epoxy",
-                        info: "General purpose epoxy resin used for casting, laminating and repairs.",
+                    "AEROSIL": {
+                        resin: "Aerosil Resin",
+                        hardener: "Aerosil Hardener",
+                        ratio: 0.1,
+                        ratioText: "10 : 0.5 :  1",
+                        type: "Aerosil Mix",
+                        info: "This mix uses resin, aerosil, hardener, and a single drop of pigment for a fine filler-style finish.",
                         potLife: "25 Minutes"
                     }
 
@@ -818,6 +836,11 @@ border-radius:15px;
         ${data.ratioText}
     </div>
 
+    ${data.extraRow ? `<div id="extraRowCard" style="margin-bottom: 10px;">
+        <b>Extra Mix Row</b><br>
+        ${data.extraRow}
+    </div>` : ''}
+
     <div id="infoCard">
         <b>${data.type}</b><br><br>
 
@@ -840,16 +863,29 @@ border-radius:15px;
                 function resinChanged() {
 
                     let type = document.getElementById("component").value;
-                    let ratio = resinData[type].ratio;
 
                     let resin = parseFloat(document.getElementById("resinWeight").value) || 0;
 
+                    if (type === "AEROSIL") {
+                        if (resin <= 0) {
+                            document.getElementById("hardenerWeight").value = "";
+                            document.getElementById("aerosilWeight").value = "";
+                            document.getElementById("totalWeight").value = "";
+                            return;
+                        }
+
+                        let scale = resin / 10;
+                        document.getElementById("hardenerWeight").value = (scale * 1).toFixed(2);
+                        document.getElementById("aerosilWeight").value = (scale * 0.5).toFixed(2);
+                        document.getElementById("totalWeight").value = (scale * 11.5).toFixed(2);
+                        return;
+                    }
+
+                    let ratio = resinData[type].ratio;
                     let hardener = resin * ratio;
 
                     document.getElementById("hardenerWeight").value = hardener.toFixed(2);
-
-                    document.getElementById("totalWeight").value =
-                        (resin + hardener).toFixed(2);
+                    document.getElementById("totalWeight").value = (resin + hardener).toFixed(2);
 
                 }
 
@@ -861,16 +897,53 @@ border-radius:15px;
                 function hardenerChanged() {
 
                     let type = document.getElementById("component").value;
-                    let ratio = resinData[type].ratio;
 
                     let hardener = parseFloat(document.getElementById("hardenerWeight").value) || 0;
 
+                    if (type === "AEROSIL") {
+                        if (hardener <= 0) {
+                            document.getElementById("resinWeight").value = "";
+                            document.getElementById("aerosilWeight").value = "";
+                            document.getElementById("totalWeight").value = "";
+                            return;
+                        }
+
+                        let scale = hardener / 1;
+                        document.getElementById("resinWeight").value = (scale * 10).toFixed(2);
+                        document.getElementById("aerosilWeight").value = (scale * 0.5).toFixed(2);
+                        document.getElementById("totalWeight").value = (scale * 11.5).toFixed(2);
+                        return;
+                    }
+
+                    let ratio = resinData[type].ratio;
                     let resin = hardener / ratio;
 
                     document.getElementById("resinWeight").value = resin.toFixed(2);
+                    document.getElementById("totalWeight").value = (resin + hardener).toFixed(2);
 
-                    document.getElementById("totalWeight").value =
-                        (resin + hardener).toFixed(2);
+                }
+
+                function aerosilChanged() {
+
+                    let type = document.getElementById("component").value;
+
+                    if (type !== "AEROSIL") {
+                        return;
+                    }
+
+                    let aerosil = parseFloat(document.getElementById("aerosilWeight").value) || 0;
+
+                    if (aerosil <= 0) {
+                        document.getElementById("resinWeight").value = "";
+                        document.getElementById("hardenerWeight").value = "";
+                        document.getElementById("totalWeight").value = "";
+                        return;
+                    }
+
+                    let scale = aerosil / 0.5;
+                    document.getElementById("resinWeight").value = (scale * 10).toFixed(2);
+                    document.getElementById("hardenerWeight").value = (scale * 1).toFixed(2);
+                    document.getElementById("totalWeight").value = (scale * 11.5).toFixed(2);
 
                 }
 
@@ -902,15 +975,22 @@ border-radius:15px;
                 function resinTypeChanged() {
 
                     document.getElementById("resinWeight").value = "";
-
                     document.getElementById("hardenerWeight").value = "";
-
+                    document.getElementById("aerosilWeight").value = "";
                     document.getElementById("totalWeight").value = "";
 
+                    showAerosilFields();
                     updateResinDetails();
-
                     updateImages();
 
+                }
+
+                function showAerosilFields() {
+                    const type = document.getElementById("component").value;
+                    const aerosilRow = document.getElementById("aerosilRow");
+                    if (aerosilRow) {
+                        aerosilRow.style.display = type === "AEROSIL" ? "flex" : "none";
+                    }
                 }
 
 
@@ -920,10 +1000,9 @@ border-radius:15px;
 
                 window.onload = function () {
 
+                    showAerosilFields();
                     updateResinDetails();
-
                     updateImages();
-
                     updatePaintTitle();
 
                 }
@@ -934,6 +1013,7 @@ border-radius:15px;
                     const type = document.getElementById('component').value;
                     const resinImg = document.getElementById('resinFieldImage');
                     const hardenerImg = document.getElementById('hardenerFieldImage');
+                    const aerosilImg = document.getElementById('aerosilFieldImage');
                     const imagesDiv = document.getElementById('componentImages');
 
                     let resinSrc = '';
@@ -954,9 +1034,9 @@ border-radius:15px;
                         hardenerSrc = 'https://res.cloudinary.com/dpxrmf3vc/image/upload/v1782038229/951_w9obmp.jpg';
                     }
 
-                    if (type === 'EPOXY RESIN') {
-                        resinSrc = 'https://res.cloudinary.com/dpxrmf3vc/image/upload/v1782040629/WhatsApp_Image_2026-06-21_at_4.45.47_PM_zbjlpc.jpg';
-                        hardenerSrc = 'https://res.cloudinary.com/dpxrmf3vc/image/upload/v1782040629/WhatsApp_Image_2026-06-21_at_4.45.46_PM_fp0nem.jpg';
+                    if (type === 'AEROSIL' || type === 'Aerosil') {
+                        resinSrc = 'https://res.cloudinary.com/dpxrmf3vc/image/upload/v1782038273/556_lsrmvi.jpg';
+                        hardenerSrc = 'https://res.cloudinary.com/dpxrmf3vc/image/upload/v1782038229/951_w9obmp.jpg';
                     }
 
                     if (resinImg) {
@@ -965,6 +1045,12 @@ border-radius:15px;
 
                     if (hardenerImg) {
                         hardenerImg.src = hardenerSrc;
+                    }
+
+                    if (aerosilImg) {
+                        aerosilImg.src = type === 'AEROSIL' || type === 'Aerosil'
+                            ? 'https://res.cloudinary.com/dpxrmf3vc/image/upload/v1782888551/aerosil-200-powder_y42hoc.jpg'
+                            : resinSrc;
                     }
 
                     if (imagesDiv) {
