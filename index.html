@@ -554,12 +554,12 @@
                 <option value="Araldite LY 1564">Araldite LY 1564</option>
                 <option value="AV138">AV138</option>
                 <option value="Araldite LY 556">Araldite LY 556</option>
-                <option value="AEROSIL">AEROSIL</option>
+                <option value="AEROSIL">AEROSIL (Fumed Silica)</option>
 
             </select>
             <div class="field-row">
                 <div class="field-input-group">
-                    <label>Resin Weight (g)</label>
+                    <label id="resinWeightLabel">Resin Weight (g)</label>
                     <input type="number" id="resinWeight" placeholder="Enter Resin Weight" oninput="resinChanged()">
                 </div>
                 <img id="resinFieldImage" class="field-image" onclick="openImage(this.src)" alt="Resin image">
@@ -988,8 +988,12 @@ border-radius:15px;
                 function showAerosilFields() {
                     const type = document.getElementById("component").value;
                     const aerosilRow = document.getElementById("aerosilRow");
+                    const resinLabel = document.getElementById("resinWeightLabel");
                     if (aerosilRow) {
                         aerosilRow.style.display = type === "AEROSIL" ? "flex" : "none";
+                    }
+                    if (resinLabel) {
+                        resinLabel.textContent = type === "AEROSIL" ? "Resin Weight - LY 556" : "Resin Weight (g)";
                     }
                 }
 
