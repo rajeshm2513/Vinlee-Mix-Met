@@ -555,6 +555,8 @@
                 <option value="AV138">AV138</option>
                 <option value="Araldite LY 556">Araldite LY 556</option>
                 <option value="AEROSIL">AEROSIL (Fumed Silica)</option>
+                <option value="Polyester Gelcoat">Polyester Gelcoat</option>
+                <option value="Vinylester Resin">Vinylester Resin</option>
 
             </select>
             <div class="field-row">
@@ -565,12 +567,39 @@
                 <img id="resinFieldImage" class="field-image" onclick="openImage(this.src)" alt="Resin image">
             </div>
 
-            <div class="field-row">
+
+            <div class="field-row" id="promoterRow" style="display:none;">
                 <div class="field-input-group">
-                    <label>Hardener Weight (g)</label>
+                    <label id="promoterWeightLabel">Promoter Weight (g)</label>
+                    <input type="number" id="promoterWeight" placeholder="Enter Promoter Weight" oninput="promoterChanged()">
+                </div>
+                <img id="promoterFieldImage" class="field-image" onclick="openImage(this.src)" alt="Promoter image">
+            </div>
+
+            <div class="field-row" id="acceleratorRow" style="display:none;">
+                <div class="field-input-group">
+                    <label id="acceleratorWeightLabel">Accelerator Weight (g)</label>
+                    <input type="number" id="acceleratorWeight" placeholder="Enter Accelerator Weight" oninput="acceleratorChanged()">
+                </div>
+                <img id="acceleratorFieldImage" class="field-image" onclick="openImage(this.src)" alt="Accelerator image">
+            </div>
+
+               <div class="field-row">
+                <div class="field-input-group">
+                    <label id="hardenerWeightLabel">Hardener Weight (g)</label>
                     <input type="number" id="hardenerWeight" placeholder="Enter Hardener Weight" oninput="hardenerChanged()">
                 </div>
                 <img id="hardenerFieldImage" class="field-image" onclick="openImage(this.src)" alt="Hardener image">
+            </div>
+
+            <div class="field-row" id="cureSpeedRow" style="display:none;">
+                <div class="field-input-group">
+                    <label>Hardener Speed</label>
+                    <select id="cureSpeedSelect" onchange="cureSpeedChanged()">
+                        <option value="slow">Slow - 1.5%</option>
+                        <option value="fast">Fast - 1.8%</option>
+                    </select>
+                </div>
             </div>
 
             <div class="field-row" id="aerosilRow" style="display:none;">
@@ -750,6 +779,31 @@ border-radius:15px;
                         return;
                     }
 
+                    const perc = getCurrentResinPercentages(type);
+                    if (type === "Polyester Gelcoat") {
+                        if (total <= 0) {
+                            resetResinInputs();
+                            return;
+                        }
+
+                        let resin = total / (1 + perc.hardener + perc.accelerator);
+                        document.getElementById("resinWeight").value = resin.toFixed(2);
+                        updateResinAdditives(resin, type);
+                        return;
+                    }
+
+                    if (type === "Vinylester Resin") {
+                        if (total <= 0) {
+                            resetResinInputs();
+                            return;
+                        }
+
+                        let resin = total / (1 + perc.hardener + perc.accelerator + perc.promoter);
+                        document.getElementById("resinWeight").value = resin.toFixed(2);
+                        updateResinAdditives(resin, type);
+                        return;
+                    }
+
                     let ratio = resinData[type].ratio;
                     let resin = total / (1 + ratio);
                     let hardener = resin * ratio;
@@ -757,6 +811,69 @@ border-radius:15px;
                     document.getElementById("resinWeight").value = resin.toFixed(2);
                     document.getElementById("hardenerWeight").value = hardener.toFixed(2);
 
+                }
+
+                function getCurrentResinPercentages(type) {
+                    if (type === "Polyester Gelcoat") {
+                        return { accelerator: 0.005, hardener: 0.012 };
+                    }
+
+                    if (type === "Vinylester Resin") {
+                        const speed = document.getElementById("cureSpeedSelect").value || "slow";
+                        const hardener = {
+                            slow: 0.015,
+                            medium: 0.015,
+                            fast: 0.018
+                        }[speed] || 0.015;
+
+                        return {
+                            accelerator: 0.005,
+                            hardener: hardener,
+                            promoter: 0.015
+                        };
+                    }
+
+                    return null;
+                }
+
+                function resetResinInputs() {
+                    document.getElementById("resinWeight").value = "";
+                    document.getElementById("hardenerWeight").value = "";
+                    document.getElementById("acceleratorWeight").value = "";
+                    document.getElementById("promoterWeight").value = "";
+                    document.getElementById("aerosilWeight").value = "";
+                    document.getElementById("totalWeight").value = "";
+                }
+
+                function updateResinAdditives(baseResin, type) {
+                    const perc = getCurrentResinPercentages(type);
+
+                    if (!perc) {
+                        document.getElementById("hardenerWeight").value = "";
+                        document.getElementById("acceleratorWeight").value = "";
+                        document.getElementById("promoterWeight").value = "";
+                        document.getElementById("totalWeight").value = "";
+                        return;
+                    }
+
+                    if (type === "Polyester Gelcoat") {
+                        const hardener = baseResin * perc.hardener;
+                        const accelerator = baseResin * perc.accelerator;
+                        document.getElementById("hardenerWeight").value = hardener.toFixed(2);
+                        document.getElementById("acceleratorWeight").value = accelerator.toFixed(2);
+                        document.getElementById("totalWeight").value = (baseResin + hardener + accelerator).toFixed(2);
+                        return;
+                    }
+
+                    if (type === "Vinylester Resin") {
+                        const hardener = baseResin * perc.hardener;
+                        const accelerator = baseResin * perc.accelerator;
+                        const promoter = baseResin * perc.promoter;
+                        document.getElementById("hardenerWeight").value = hardener.toFixed(2);
+                        document.getElementById("acceleratorWeight").value = accelerator.toFixed(2);
+                        document.getElementById("promoterWeight").value = promoter.toFixed(2);
+                        document.getElementById("totalWeight").value = (baseResin + hardener + accelerator + promoter).toFixed(2);
+                    }
                 }
 
                 /* ===========================
@@ -803,6 +920,24 @@ border-radius:15px;
                         type: "Aerosil Mix",
                         info: "This mix uses resin, aerosil, hardener, and a single drop of pigment for a fine filler-style finish.",
                         potLife: "25 Minutes"
+                    },
+
+                    "Polyester Gelcoat": {
+                        resin: "Polyester Gelcoat",
+                        hardener: "Hardener",
+                        ratioText: "Accelerator 0.5% • Hardener 1.2%",
+                        type: "Gelcoat Mix",
+                        info: "This mix uses 0.5% accelerator and 1.2% hardener by weight for polyester gelcoat applications.",
+                        potLife: "Varies by temperature and catalyst response"
+                    },
+
+                    "Vinylester Resin": {
+                        resin: "Vinylester Resin",
+                        hardener: "Hardener",
+                        ratioText: "Accelerator 0.5% • Hardener 1.5% (slow/default) / 1.8% (fast) • Promoter 1.5%",
+                        type: "Vinylester Resin",
+                        info: "For vinylester resin, the accelerator is 0.5%, promoter is 1.5%, and hardener is 1.5% for slow/default cure speed or 1.8% for fast cure speed.",
+                        potLife: "Depends on selected speed"
                     }
 
                 };
@@ -881,6 +1016,16 @@ border-radius:15px;
                         return;
                     }
 
+                    if (type === "Polyester Gelcoat" || type === "Vinylester Resin") {
+                        if (resin <= 0) {
+                            resetResinInputs();
+                            return;
+                        }
+
+                        updateResinAdditives(resin, type);
+                        return;
+                    }
+
                     let ratio = resinData[type].ratio;
                     let hardener = resin * ratio;
 
@@ -915,11 +1060,105 @@ border-radius:15px;
                         return;
                     }
 
+                    if (type === "Polyester Gelcoat" || type === "Vinylester Resin") {
+                        const perc = getCurrentResinPercentages(type);
+                        if (hardener <= 0) {
+                            resetResinInputs();
+                            return;
+                        }
+
+                        let resin = hardener / perc.hardener;
+                        document.getElementById("resinWeight").value = resin.toFixed(2);
+                        updateResinAdditives(resin, type);
+                        return;
+                    }
+
                     let ratio = resinData[type].ratio;
                     let resin = hardener / ratio;
 
                     document.getElementById("resinWeight").value = resin.toFixed(2);
                     document.getElementById("totalWeight").value = (resin + hardener).toFixed(2);
+
+                }
+
+                function acceleratorChanged() {
+
+                    let type = document.getElementById("component").value;
+                    let accelerator = parseFloat(document.getElementById("acceleratorWeight").value) || 0;
+
+                    if (type !== "Polyester Gelcoat" && type !== "Vinylester Resin") {
+                        return;
+                    }
+
+                    const perc = getCurrentResinPercentages(type);
+                    if (accelerator <= 0) {
+                        resetResinInputs();
+                        return;
+                    }
+
+                    let resin = accelerator / perc.accelerator;
+                    document.getElementById("resinWeight").value = resin.toFixed(2);
+                    updateResinAdditives(resin, type);
+
+                }
+
+                function promoterChanged() {
+
+                    let type = document.getElementById("component").value;
+                    let promoter = parseFloat(document.getElementById("promoterWeight").value) || 0;
+
+                    if (type !== "Vinylester Resin") {
+                        return;
+                    }
+
+                    const perc = getCurrentResinPercentages(type);
+                    if (promoter <= 0) {
+                        resetResinInputs();
+                        return;
+                    }
+
+                    let resin = promoter / perc.promoter;
+                    document.getElementById("resinWeight").value = resin.toFixed(2);
+                    updateResinAdditives(resin, type);
+
+                }
+
+                function cureSpeedChanged() {
+
+                    const type = document.getElementById("component").value;
+                    if (type !== "Vinylester Resin") {
+                        return;
+                    }
+
+                    const resin = parseFloat(document.getElementById("resinWeight").value) || 0;
+                    if (resin > 0) {
+                        updateResinAdditives(resin, type);
+                        return;
+                    }
+
+                    const hardener = parseFloat(document.getElementById("hardenerWeight").value) || 0;
+                    const accelerator = parseFloat(document.getElementById("acceleratorWeight").value) || 0;
+                    const promoter = parseFloat(document.getElementById("promoterWeight").value) || 0;
+
+                    if (hardener > 0) {
+                        let baseResin = hardener / getCurrentResinPercentages(type).hardener;
+                        document.getElementById("resinWeight").value = baseResin.toFixed(2);
+                        updateResinAdditives(baseResin, type);
+                        return;
+                    }
+
+                    if (accelerator > 0) {
+                        let baseResin = accelerator / getCurrentResinPercentages(type).accelerator;
+                        document.getElementById("resinWeight").value = baseResin.toFixed(2);
+                        updateResinAdditives(baseResin, type);
+                        return;
+                    }
+
+                    if (promoter > 0) {
+                        let baseResin = promoter / getCurrentResinPercentages(type).promoter;
+                        document.getElementById("resinWeight").value = baseResin.toFixed(2);
+                        updateResinAdditives(baseResin, type);
+                    }
 
                 }
 
@@ -974,11 +1213,7 @@ border-radius:15px;
 
                 function resinTypeChanged() {
 
-                    document.getElementById("resinWeight").value = "";
-                    document.getElementById("hardenerWeight").value = "";
-                    document.getElementById("aerosilWeight").value = "";
-                    document.getElementById("totalWeight").value = "";
-
+                    resetResinInputs();
                     showAerosilFields();
                     updateResinDetails();
                     updateImages();
@@ -988,12 +1223,44 @@ border-radius:15px;
                 function showAerosilFields() {
                     const type = document.getElementById("component").value;
                     const aerosilRow = document.getElementById("aerosilRow");
+                    const acceleratorRow = document.getElementById("acceleratorRow");
+                    const promoterRow = document.getElementById("promoterRow");
+                    const cureSpeedRow = document.getElementById("cureSpeedRow");
                     const resinLabel = document.getElementById("resinWeightLabel");
+                    const hardenerLabel = document.getElementById("hardenerWeightLabel");
+                    const acceleratorLabel = document.getElementById("acceleratorWeightLabel");
+                    const promoterLabel = document.getElementById("promoterWeightLabel");
+
                     if (aerosilRow) {
                         aerosilRow.style.display = type === "AEROSIL" ? "flex" : "none";
                     }
+
+                    if (acceleratorRow) {
+                        acceleratorRow.style.display = type === "Polyester Gelcoat" || type === "Vinylester Resin" ? "flex" : "none";
+                    }
+
+                    if (promoterRow) {
+                        promoterRow.style.display = type === "Vinylester Resin" ? "flex" : "none";
+                    }
+
+                    if (cureSpeedRow) {
+                        cureSpeedRow.style.display = type === "Vinylester Resin" ? "flex" : "none";
+                    }
+
                     if (resinLabel) {
                         resinLabel.textContent = type === "AEROSIL" ? "Resin Weight - LY 556" : "Resin Weight (g)";
+                    }
+
+                    if (hardenerLabel) {
+                        hardenerLabel.textContent = "Hardener Weight (g)";
+                    }
+
+                    if (acceleratorLabel) {
+                        acceleratorLabel.textContent = type === "Vinylester Resin" ? "Accelerator Weight (g)" : "Accelerator Weight (g)";
+                    }
+
+                    if (promoterLabel) {
+                        promoterLabel.textContent = "Promoter Weight (g)";
                     }
                 }
 
@@ -1017,6 +1284,8 @@ border-radius:15px;
                     const type = document.getElementById('component').value;
                     const resinImg = document.getElementById('resinFieldImage');
                     const hardenerImg = document.getElementById('hardenerFieldImage');
+                    const acceleratorImg = document.getElementById('acceleratorFieldImage');
+                    const promoterImg = document.getElementById('promoterFieldImage');
                     const aerosilImg = document.getElementById('aerosilFieldImage');
                     const imagesDiv = document.getElementById('componentImages');
 
@@ -1043,12 +1312,34 @@ border-radius:15px;
                         hardenerSrc = 'https://res.cloudinary.com/dpxrmf3vc/image/upload/v1782038229/951_w9obmp.jpg';
                     }
 
+                    if (type === 'Polyester Gelcoat') {
+                        resinSrc = ' https://res.cloudinary.com/dpxrmf3vc/image/upload/v1785337480/compressed-DSC04478_tygvme.jpg';
+                        hardenerSrc = 'https://res.cloudinary.com/dpxrmf3vc/image/upload/v1785337481/compressed-DSC04469_l9dkln.jpg';
+                    }
+
+                    if (type === 'Vinylester Resin') {
+                        resinSrc = 'https://res.cloudinary.com/dpxrmf3vc/image/upload/v1785337480/compressed-DSC04475_vhn5gy.jpg';
+                        hardenerSrc = 'https://res.cloudinary.com/dpxrmf3vc/image/upload/v1785337481/compressed-DSC04469_l9dkln.jpg';
+                    }
+
                     if (resinImg) {
                         resinImg.src = resinSrc;
                     }
 
                     if (hardenerImg) {
                         hardenerImg.src = hardenerSrc;
+                    }
+
+                    if (acceleratorImg) {
+                        acceleratorImg.src = type === 'Polyester Gelcoat' || type === 'Vinylester Resin'
+                            ? 'https://res.cloudinary.com/dpxrmf3vc/image/upload/v1785337480/compressed-DSC04471_pdbxxt.jpg'
+                            : '';
+                    }
+
+                    if (promoterImg) {
+                        promoterImg.src = type === 'Vinylester Resin'
+                            ? 'https://res.cloudinary.com/dpxrmf3vc/image/upload/v1785337479/compressed-DSC04467_ja3x02.jpg'
+                            : '';
                     }
 
                     if (aerosilImg) {
